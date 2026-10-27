@@ -9,12 +9,20 @@ const Home = () => {
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ resumeFile, setResumeFile ] = useState(null)
+    const [ generationError, setGenerationError ] = useState("")
 
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
+        setGenerationError("")
+        try {
+            const data = await generateReport({ jobDescription, selfDescription, resumeFile })
+            if (data) {
+                navigate(`/interview/${data._id}`)
+            }
+        } catch (error) {
+            setGenerationError(error.response?.data?.message || "Could not generate your interview plan. Please try again.")
+        }
     }
 
     if (loading) {
@@ -112,6 +120,7 @@ const Home = () => {
                 {/* Card Footer */}
                 <div className='interview-card__footer'>
                     <span className='footer-info'>AI-Powered Strategy Generation &bull; Approx 30s</span>
+                    {generationError && <p role="alert">{generationError}</p>}
                     <button
                         onClick={handleGenerateReport}
                         className='generate-btn'>
